@@ -1,6 +1,6 @@
 <?php
 
-namespace Shetabit\Payment\Provider;
+namespace Shetabit\Tokenable\Provider;
 
 use Shetabit\Tokenable\Token;
 use Illuminate\Support\ServiceProvider;
