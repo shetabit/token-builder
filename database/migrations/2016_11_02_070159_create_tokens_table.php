@@ -18,7 +18,7 @@ class CreateTokensTable extends Migration
             $table->timestamp('expired_at')->nullable();
             $table->integer('usage_count')->default(0);
             $table->integer('max_usage_limit')->default(1);
-            $table->unsignedTinyInteger('type');
+            $table->string('type')->nullable();
             $table->nullableMorphs('tokenable');
             $table->timestamps();
             $table->softDeletes();

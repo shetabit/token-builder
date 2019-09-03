@@ -34,6 +34,8 @@ class Token
     public function via(TokenBuilder $tokenBuilder)
     {
         $this->builder = $tokenBuilder;
+
+        return $this;
     }
 
     /**
@@ -55,7 +57,7 @@ class Token
         ];
 
         if ($this->getRelatedItem()) {
-            $token = $this->getRelatedItem()->tokens()->create($tokenData);
+            $token = $this->getRelatedItem()->temporaryTokens()->create($tokenData);
         } else {
             $token = app(TokensRepository::class)->create($tokenData);
         }
@@ -92,4 +94,3 @@ class Token
         );
     }
 }
-
