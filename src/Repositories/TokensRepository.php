@@ -16,18 +16,24 @@ class TokensRepository extends RepositoryAbstract
     /**
      * Retrieve a token.
      *
+     * @param $token
+     * @param $type
+     * @param $tokenable
+     *
      * @return Token|null
      */
     public function findToken($token, ?string $type = null, ?Model $tokenable = null) : ?Token
     {
-        return $this
-            ->model
+        if (!empty($tokenable)) {
+            $query = $tokenable->temporaryTokens();
+        } else {
+            $query = $this->model;
+        }
+
+        return $query
             ->where('token', '=', $token)
             ->when(!empty($type), function ($query) use ($type) {
                 return $query->where('type', '=', $type);
-            })
-            ->when(!empty($tokenable), function($query) use ($tokenable) {
-                return $query->whereHas('tokenable', $tokenable);
             })
             ->with('tokenable')
             ->first();
@@ -36,19 +42,25 @@ class TokensRepository extends RepositoryAbstract
     /**
      * Retrieve a token if it is valid.
      *
+     * @param $token
+     * @param $type
+     * @param $tokenable
+     *
      * @return Token|null
      */
     public function findValidToken($token, ?string $type = null, ?Model $tokenable = null) : ?Token
     {
-        return $this
-            ->model
+        if (!empty($tokenable)) {
+            $query = $tokenable->temporaryTokens();
+        } else {
+            $query = $this->model;
+        }
+
+        return $query
             ->valid()
             ->where('token', '=', $token)
             ->when(!empty($type), function ($query) use ($type) {
                 return $query->where('type', '=', $type);
-            })
-            ->when(!empty($tokenable), function($query) use ($tokenable) {
-                return $query->whereHas('tokenable', $tokenable);
             })
             ->with('tokenable')
             ->first();
