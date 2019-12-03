@@ -90,11 +90,13 @@ class Token extends Model
     /**
      * Mark token as expired
      *
-     * @return bool
+     * @return mixed
      */
     public function markAsExpired()
     {
-        return $this->forceFill(['expired_at' => now()])->save();
+        $this->forceFill(['expired_at' => now()])->save();
+
+        return $this;
     }
 
     /**
