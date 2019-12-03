@@ -4,19 +4,22 @@ namespace Shetabit\Tokenable;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Shetabit\Tokenable\Contracts\TokenBuilderInterface;
 
-class TokenBuilder
+class TokenBuilder implements TokenBuilderInterface
 {
     protected $token;
     protected $expiredAt;
     protected $usageLimit;
     protected $type;
     protected $relatedItem;
+    protected $data;
 
     /**
      * Set token
      *
      * @param $token
+     *
      * @return $this
      */
     public function setToken($token)
@@ -37,9 +40,34 @@ class TokenBuilder
     }
 
     /**
+     * Set data
+     *
+     * @param $token
+     *
+     * @return $this
+     */
+    public function setData($data)
+    {
+        $this->data = is_array($data) ? $data : func_get_args();
+
+        return $this;
+    }
+
+    /**
+     * Retrieve data
+     *
+     * @return array
+     */
+    public function getData() : array
+    {
+        return $this->data ?? [];
+    }
+
+    /**
      * Set expiration date
      *
      * @param Carbon $date
+     *
      * @return $this
      */
     public function setExpireDate(Carbon $date)
@@ -63,6 +91,7 @@ class TokenBuilder
      * Set max usage count
      *
      * @param int $number
+     *
      * @return $this
      */
     public function setUsageLimit(int $number)
@@ -106,6 +135,7 @@ class TokenBuilder
      * Set related Eloquent Model instance
      *
      * @param Model $item
+     *
      * @return $this
      */
     public function setRelatedItem(Model $item)

@@ -35,6 +35,7 @@ abstract class RepositoryAbstract implements RepositoryInterface
      * Create new item and store it
      *
      * @param array $data
+     * 
      * @return mixed
      */
     public function create(array $data)
@@ -46,6 +47,7 @@ abstract class RepositoryAbstract implements RepositoryInterface
      * Find item using its id.
      *
      * @param $id
+     * 
      * @return mixed
      */
     public function find($id)
@@ -58,6 +60,7 @@ abstract class RepositoryAbstract implements RepositoryInterface
      *
      * @param $model
      * @param array $data
+     * 
      * @return mixed
      */
     public function update($model, array $data)
@@ -75,6 +78,7 @@ abstract class RepositoryAbstract implements RepositoryInterface
      * Delete item.
      *
      * @param $model
+     * 
      * @return mixed
      */
     public function delete($model)
@@ -104,6 +108,7 @@ abstract class RepositoryAbstract implements RepositoryInterface
      *
      * @param $method
      * @param $arguments
+     * 
      * @return mixed
      */
     public function __call($method, $arguments)

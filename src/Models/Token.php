@@ -20,10 +20,11 @@ class Token extends Model
      */
     protected $fillable = [
         'token',
-        'used_at',
         'expired_at',
-        'type',
+        'usage_count',
         'max_usage_limit',
+        'data',
+        'type',
     ];
 
     /**
@@ -43,6 +44,7 @@ class Token extends Model
     protected $casts = [
         'usage_count' => 'integer',
         'max_usage_limit' => 'integer',
+        'data' => 'json',
     ];
 
     /**
@@ -62,9 +64,7 @@ class Token extends Model
      */
     public function use()
     {
-        $usageCount = $this->usage_count;
-
-        return $this->forceFill(['usage_count' => ++$usageCount])->save();
+        return $this->increment('usage_count');
     }
 
     /**
@@ -134,6 +134,7 @@ class Token extends Model
      * Filter valid tokens
      *
      * @param $query
+     *
      * @return mixed
      */
     public function scopeValid($query)
