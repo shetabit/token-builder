@@ -4,6 +4,7 @@ namespace Shetabit\Tokenable;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Shetabit\Tokenable\Models\Token;
 use Shetabit\Tokenable\Repositories\TokensRepository;
 use Shetabit\Tokenable\Traits\Concerns\Validation;
 
@@ -134,6 +135,8 @@ class TokenBuilder
     public function setType(string $type)
     {
         $this->type = $type;
+
+        return $this;
     }
 
     /**
@@ -173,9 +176,9 @@ class TokenBuilder
     /**
      * Create a new token
      *
-     * @return mixed
+     * @return Token
      */
-    public function build()
+    public function build() : Token
     {
         $tokenData = [
             'token' => $this->getToken() ?? $this->generateRandomInt(),
@@ -199,9 +202,9 @@ class TokenBuilder
      *
      * @alias build
      *
-     * @return Model
+     * @return Token
      */
-    public function create()
+    public function create() : Token
     {
         return $this->build();
     }
