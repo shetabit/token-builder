@@ -12,7 +12,7 @@ class TokenBuilder
 {
     use Validation;
 
-    protected $token;
+    protected $uniqueId;
     protected $expiredAt;
     protected $usageLimit;
     protected $type;
@@ -34,25 +34,25 @@ class TokenBuilder
     /**
      * Set token
      *
-     * @param $token
+     * @param $uniqueId
      *
      * @return $this
      */
-    public function setToken($token)
+    public function setUniqueId($uniqueId)
     {
-        $this->token = $token;
+        $this->uniqueId = $uniqueId;
 
         return $this;
     }
 
     /**
-     * Retrieve token
+     * Retrieve uniqueId
      *
      * @return mixed
      */
-    public function getToken()
+    public function getUniqueId()
     {
-        return $this->token;
+        return $this->uniqueId;
     }
 
     /**
@@ -181,7 +181,7 @@ class TokenBuilder
     public function build() : Token
     {
         $tokenData = [
-            'token' => $this->getToken() ?? $this->generateRandomInt(),
+            'token' => $this->getUniqueId() ?? $this->generateRandomInt(),
             'expired_at' => $this->getExpireDate(),
             'max_usage_limit' => $this->getUsageLimit(),
             'type' => $this->getType(),
@@ -216,7 +216,7 @@ class TokenBuilder
      */
     public function findToken() : ?Token
     {
-        $token = $this->getToken();
+        $token = $this->getUniqueId();
         $type = $this->getType();
         $tokenable = $this->getRelatedItem();
 
@@ -228,7 +228,7 @@ class TokenBuilder
      * 
      * @return int
      */
-    private function generateRandomInt($length = 6)
+    private function generateRandomInt($length = 8)
     {
         return random_int(10**($length-1)+1, (10**$length)-1);
     }

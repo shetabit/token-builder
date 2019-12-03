@@ -13,7 +13,7 @@ trait Validation
      */
     public function findValidToken() : ?Token
     {
-        $token = $this->getToken();
+        $token = $this->getUniqueId();
         $type = $this->getType();
         $tokenable = $this->getRelatedItem();
 
