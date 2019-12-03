@@ -208,7 +208,7 @@ class Token
             'expired_at' => $builder->getExpireDate(),
             'max_usage_limit' => $builder->getUsageLimit(),
             'type' => $builder->getType(),
-            'data' => $builder->getData();
+            'data' => $builder->getData()
         ];
 
         if ($this->getRelatedItem()) {
