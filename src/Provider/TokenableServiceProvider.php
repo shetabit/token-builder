@@ -14,7 +14,15 @@ class TokenableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+        /**
+         * Migrations that needs to be done by user.
+         */
+        $this->publishes(
+            [
+                __DIR__.'/../../database/migrations/' => database_path('migrations')
+            ],
+            'migrations'
+        );
     }
 
     /**
