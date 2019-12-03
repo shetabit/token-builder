@@ -210,6 +210,20 @@ class TokenBuilder
     }
 
     /**
+     * Retrieve a token.
+     *
+     * @return Token|null
+     */
+    public function findToken() : ?Token
+    {
+        $token = $this->getToken();
+        $type = $this->getType();
+        $tokenable = $this->getRelatedItem();
+
+        return  empty($token) ? null : $this->tokensRepository->findToken($token, $type, $tokenable);
+    }
+
+    /**
      * Generate a random token
      * 
      * @return int

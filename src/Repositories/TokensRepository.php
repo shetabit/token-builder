@@ -14,11 +14,31 @@ class TokensRepository extends RepositoryAbstract
     }
 
     /**
+     * Retrieve a token.
+     *
+     * @return Token|null
+     */
+    public function findToken($token, ?string $type = null, ?Model $tokenable = null) : ?Token
+    {
+        return $this
+            ->model
+            ->where('token', '=', $token)
+            ->when(!empty($type), function ($query) use ($type) {
+                return $query->where('type', '=', $type);
+            })
+            ->when(!empty($tokenable), function($query) use ($tokenable) {
+                return $query->whereHas('tokenable', $tokenable);
+            })
+            ->with('tokenable')
+            ->first();
+    }
+
+    /**
      * Retrieve a token if it is valid.
      *
-     * @return mixed
+     * @return Token|null
      */
-    public function findValidToken($token, ?string $type = null, ?Model $tokenable = null)
+    public function findValidToken($token, ?string $type = null, ?Model $tokenable = null) : ?Token
     {
         return $this
             ->model
