@@ -59,7 +59,7 @@
                 "Shetabit\\Tokenable\\Provider\\TokenableServiceProvider"
             ],
             "aliases": {
-                "Tokenable": "Shetabit\\Tokenable\\Facade\\Tokenable"
+                "TokenBuilder": "Shetabit\\Tokenable\\Facade\\TokenBuilder"
             }
         }
     },

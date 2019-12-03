@@ -2,8 +2,8 @@
 
 namespace Shetabit\Tokenable\Provider;
 
-use Shetabit\Tokenable\Token;
 use Illuminate\Support\ServiceProvider;
+use Shetabit\Tokenable\TokenBuilder;
 
 class TokenableServiceProvider extends ServiceProvider
 {
@@ -36,7 +36,7 @@ class TokenableServiceProvider extends ServiceProvider
          * Bind to service container.
          */
         $this->app->bind('shetabit-tokenable', function () {
-            return new Token();
+            return new TokenBuilder();
         });
     }
 }

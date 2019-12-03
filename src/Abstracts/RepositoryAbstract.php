@@ -90,6 +90,7 @@ abstract class RepositoryAbstract implements RepositoryInterface
      * Instantiate model
      *
      * @return Model|\Illuminate\Foundation\Application|\Illuminate\Foundation\Auth\User|mixed
+     *
      * @throws \Exception
      */
     public function makeModel()

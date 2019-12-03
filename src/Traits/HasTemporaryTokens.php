@@ -1,4 +1,5 @@
 <?php
+
 namespace Shetabit\Tokenable\Traits;
 
 use Shetabit\Tokenable\Models\Token;

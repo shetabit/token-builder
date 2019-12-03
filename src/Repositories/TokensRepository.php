@@ -2,6 +2,7 @@
 
 namespace Shetabit\Tokenable\Repositories;
 
+use Illuminate\Database\Eloquent\Model;
 use Shetabit\Tokenable\Models\Token;
 use Shetabit\Tokenable\Abstracts\RepositoryAbstract;
 
@@ -17,7 +18,7 @@ class TokensRepository extends RepositoryAbstract
      *
      * @return mixed
      */
-    public function getValidToken($token, $type = null)
+    public function findValidToken($token, ?string $type = null, ?Model $tokenable = null)
     {
         return $this
             ->model
@@ -25,6 +26,9 @@ class TokensRepository extends RepositoryAbstract
             ->where('token', '=', $token)
             ->when(!empty($type), function ($query) use ($type) {
                 return $query->where('type', '=', $type);
+            })
+            ->when(!empty($tokenable), function($query) use ($tokenable) {
+                return $query->whereHas('tokenable', $tokenable);
             })
             ->with('tokenable')
             ->first();

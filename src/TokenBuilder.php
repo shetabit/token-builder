@@ -4,16 +4,31 @@ namespace Shetabit\Tokenable;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Shetabit\Tokenable\Contracts\TokenBuilderInterface;
+use Shetabit\Tokenable\Repositories\TokensRepository;
+use Shetabit\Tokenable\Traits\Concerns\validation;
 
-class TokenBuilder implements TokenBuilderInterface
+class TokenBuilder
 {
+    use validation;
+
     protected $token;
     protected $expiredAt;
     protected $usageLimit;
     protected $type;
     protected $relatedItem;
     protected $data;
+
+    /**
+     * Tokens repository
+     * 
+     * @var TokensRepository
+     */
+    protected $tokensRepository;
+
+    public function __construct()
+    {
+        $this->tokensRepository = app(TokensRepository::class);
+    }
 
     /**
      * Set token
@@ -153,6 +168,52 @@ class TokenBuilder implements TokenBuilderInterface
     public function getRelatedItem()
     {
         return $this->relatedItem;
+    }
+
+    /**
+     * Create a new token
+     *
+     * @return mixed
+     */
+    public function build()
+    {
+        $tokenData = [
+            'token' => $this->getToken() ?? $this->generateRandomInt(),
+            'expired_at' => $this->getExpireDate(),
+            'max_usage_limit' => $this->getUsageLimit(),
+            'type' => $this->getType(),
+            'data' => $this->getData()
+        ];
+
+        if ($this->getRelatedItem()) {
+            $token = $this->getRelatedItem()->temporaryTokens()->create($tokenData);
+        } else {
+            $token = $this->tokensRepository->create($tokenData);
+        }
+
+        return $token;
+    }
+
+    /**
+     * Alias build
+     *
+     * @alias build
+     *
+     * @return Model
+     */
+    public function create()
+    {
+        return $this->build();
+    }
+
+    /**
+     * Generate a random token
+     * 
+     * @return int
+     */
+    private function generateRandomInt($length = 6)
+    {
+        return random_int(10**($length-1)+1, (10**$length)-1);
     }
 }
 
