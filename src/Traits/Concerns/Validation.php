@@ -4,7 +4,7 @@ namespace Shetabit\Tokenable\Traits\Concerns;
 
 use Shetabit\Tokenable\Models\Token;
 
-trait validation
+trait Validation
 {
     /**
      * Retrieve a token if it is valid.

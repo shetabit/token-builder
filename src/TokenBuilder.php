@@ -5,11 +5,11 @@ namespace Shetabit\Tokenable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Shetabit\Tokenable\Repositories\TokensRepository;
-use Shetabit\Tokenable\Traits\Concerns\validation;
+use Shetabit\Tokenable\Traits\Concerns\Validation;
 
 class TokenBuilder
 {
-    use validation;
+    use Validation;
 
     protected $token;
     protected $expiredAt;
