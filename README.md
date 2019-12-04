@@ -32,7 +32,7 @@ we have 2 things that can **expire** genereted tokens:
   - [Validation](#validation)
   - [Add relations](#useful-methods)
   - [Attach custom data](#useful-methods)
-  - [TokenBuilder reference]
+  - [TokenBuilder reference](#tokenbuilder-reference)
   	- [setUniqueId](#setUniqueId)
   	- [getUniqueId](#getUniqueId)
   	- [setData](#setData)
@@ -48,7 +48,7 @@ we have 2 things that can **expire** genereted tokens:
   	- [build](#build)
   	- [findToken](#findToken)
   	- [findValidToken](#findValidToken)
-  - [Token (eloquent) reference]
+  - [Token (Eloquent) reference](#token-reference)
   	- [use](#use)
   	- [hasUsed](#hasUsed)
   	- [hasMaxUsageLimit](#hasMaxUsageLimit)
