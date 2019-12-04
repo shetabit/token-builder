@@ -1,5 +1,12 @@
+<p align="center"><img src="resources/images/laravel-token-builder-package.png?raw=true"></p>
+
+
+
 
 # Laravel Token Builder
+
+
+
 
 This package can generate **random tokens** which **can expires**.
 
