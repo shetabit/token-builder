@@ -15,8 +15,8 @@ or **authentication with sms pin** and etc.
 
 we have 2 things that can **expire** genereted tokens:
 
-- time limit : for example a token can be expired after 2022/05/12
-- usage limit : for example a token can be expired after using it more than 3 times.
+- **time limit** : for example a token can be expired after 2022/05/12
+- **usage limit** : for example a token can be expired after using it more than 3 times.
 
 [Donate me](https://yekpay.me/mahdikhanzadi) if you like this package :sunglasses: :bowtie:
 
