@@ -1,8 +1,5 @@
 <p align="center"><img src="resources/images/laravel-token-builder-package.png?raw=true"></p>
 
-
-
-
 # Laravel Token Builder
 
 
@@ -32,6 +29,7 @@ we have 2 things that can **expire** genereted tokens:
   - [Validation](#validation)
   - [Add relations](#useful-methods)
   - [Attach custom data](#useful-methods)
+  - [Retrieve tokens](#retrieve-tokens)
   - [TokenBuilder reference](#tokenbuilder-reference)
   	- [setUniqueId](#setUniqueId)
   	- [getUniqueId](#getUniqueId)
@@ -298,31 +296,106 @@ $tokenObject = $user->temporaryTokenBuilder()->setUniqueId($token)->findValidTok
 
 #### TokenBuilder reference
 
+This is a reference for TokenBuilder methods.
+`TokenBuilder` creates a tokenObject (instance of eloquent `Token` model) if you run build method and searches into data base using `findToken` and `findValidToken`. 
+
 - ###### setUniqueId
+- 
+  you can build tokens with your custom algoritm and use it as unique id.
+  
+  ```php
+    $token = 'jgaZ1z9';
+    $tokenObject = TokenBuilder::setUniqueId($token)->build();
+    echo $tokenObject->token; // jgaZ1z9
+  ```
+
 - ###### getUniqueId
+- 
+  returns your custom unique id (if not exists, returns `null`).
+
 - ###### setData
+- 
+  you can attach some data into tokens and retrieve them later.
+
 - ###### getData
+  
+  returns attached data.
+
 - ###### setExpireDate
+  
+  sets an expiration date.
+
 - ###### getExpireDate
+  
+  retrieves expiration date.
+
 - ###### setUsageLimit
+  
+  sets usage limit.
+
 - ###### getUsageLimit
+  
+  retrieves usage limit.
+
 - ###### setType
+  
+  sets token type. you can set type for your tokens. its like a scope for your tokens.
+
 - ###### getType
+  
+  retrieves token type.
+
 - ###### setRelatedItem
+  
+  add a relation to token.
+
 - ###### getRelatedItem
+  
+  retrieve current relation.
+
 - ###### build
+  
+  generate a token.
+
 - ###### findToken
+  
+  find token (being valid or not valid is not important) and return `null` if not exists.
+
 - ###### findValidToken
+  
+  find token if it is valid and return `null` if not exists.
 
 #### Token Reference
 
 - ###### use
+  
+  add 1 to usage counter. (usageCounter = usageCounter + 1)
+
 - ###### hasUsed
+  
+  determine is current token has used and returns a boolean result.
+
 - ###### hasMaxUsageLimit
+  
+  determine if current token max usage is limited and returns a boolean result.
+
 - ###### hasExpired
+  
+  determine if current token has expired or not.
+
 - ###### markAsExpired
+
+  mark current token as expired.
+  
+  **notice:** this method updates `expired_at` field to current time (now).
+
 - ###### isValid
+
+  determines if current token is valid (must not be expired and must not be exceeded max usage limit).
+
 - ###### tokenable
+
+  returns the token relation if there is any relation, and returns null if no relation exists.
 
 ## Change log
 
