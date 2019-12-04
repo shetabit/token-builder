@@ -1,16 +1,16 @@
 <?php
 
-namespace Shetabit\Tokenable\Facade;
+namespace Shetabit\TokenBuilder\Facade;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Class Tokenable
+ * Class TokenBuilder
  *
- * @package Shetabit\Payment\Facade
- * @see \Shetabit\Tokenable\Token
+ * @package Shetabit\TokenBuilder\Facade
+ * @see \Shetabit\TokenBuilder\Token
  */
-class Tokenable extends Facade
+class TokenBuilder extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -19,6 +19,6 @@ class Tokenable extends Facade
      */
     public static function getFacadeAccessor()
     {
-        return 'shetabit-tokenable';
+        return 'shetabit-token-builder';
     }
 }

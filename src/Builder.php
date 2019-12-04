@@ -1,14 +1,14 @@
 <?php
 
-namespace Shetabit\Tokenable;
+namespace Shetabit\TokenBuilder;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Shetabit\Tokenable\Models\Token;
-use Shetabit\Tokenable\Repositories\TokensRepository;
-use Shetabit\Tokenable\Traits\Concerns\Validation;
+use Shetabit\TokenBuilder\Models\Token;
+use Shetabit\TokenBuilder\Repositories\TokensRepository;
+use Shetabit\TokenBuilder\Traits\Concerns\Validation;
 
-class TokenBuilder
+class Builder
 {
     use Validation;
 

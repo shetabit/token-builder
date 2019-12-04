@@ -1,7 +1,7 @@
 {
     "name": "shetabit/tokenable",
     "type": "library",
-    "description": "Laravel Token Generator",
+    "description": "Laravel Token Builder",
     "keywords": [
         "laravel",
         "token",
@@ -14,9 +14,12 @@
         "one time usage pin",
         "pin number",
         "laravel pin number",
-        "laravel token"
+        "laravel token",
+        "laravel token builder",
+        "laravel pin builder",
+        "laravel pin generator"
     ],
-    "homepage": "https://github.com/shetabit/tokenable",
+    "homepage": "https://github.com/shetabit/token-builder",
     "license": "MIT",
     "authors": [
         {
@@ -56,10 +59,10 @@
         },
         "laravel": {
             "providers": [
-                "Shetabit\\Tokenable\\Provider\\TokenableServiceProvider"
+                "Shetabit\\Tokenable\\Provider\\TokenBuilderServiceProvider"
             ],
             "aliases": {
-                "TokenBuilder": "Shetabit\\Tokenable\\Facade\\TokenBuilder"
+                "TokenBuilder": "Shetabit\\TokenBuilder\\Facade\\TokenBuilder"
             }
         }
     },

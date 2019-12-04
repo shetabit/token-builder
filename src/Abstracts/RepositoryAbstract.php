@@ -1,9 +1,9 @@
 <?php
 
-namespace Shetabit\Tokenable\Abstracts;
+namespace Shetabit\TokenBuilder\Abstracts;
 
 use Illuminate\Database\Eloquent\Model;
-use Shetabit\Tokenable\Contracts\RepositoryInterface;
+use Shetabit\TokenBuilder\Contracts\RepositoryInterface;
 
 abstract class RepositoryAbstract implements RepositoryInterface
 {

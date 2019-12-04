@@ -1,10 +1,10 @@
 <?php
 
-namespace Shetabit\Tokenable\Repositories;
+namespace Shetabit\TokenBuilder\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
-use Shetabit\Tokenable\Models\Token;
-use Shetabit\Tokenable\Abstracts\RepositoryAbstract;
+use Shetabit\TokenBuilder\Models\Token;
+use Shetabit\TokenBuilder\Abstracts\RepositoryAbstract;
 
 class TokensRepository extends RepositoryAbstract
 {

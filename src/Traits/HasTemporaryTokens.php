@@ -1,9 +1,9 @@
 <?php
 
-namespace Shetabit\Tokenable\Traits;
+namespace Shetabit\TokenBuilder\Traits;
 
-use Shetabit\Tokenable\Models\Token;
-use Shetabit\Tokenable\TokenBuilder;
+use Shetabit\TokenBuilder\Models\Token;
+use Shetabit\TokenBuilder\Builder;
 
 trait HasTemporaryTokens
 {
@@ -18,11 +18,11 @@ trait HasTemporaryTokens
     /**
      * Token builder factory method.
      *
-     * @return TokenBuilder
+     * @return Builder
      */
-    public function temporaryTokenFactory() : TokenBuilder
+    public function temporaryTokenFactory() : Builder
     {
-        $tokenBuilder = new TokenBuilder;
+        $tokenBuilder = new Builder;
 
         $tokenBuilder->setRelatedItem($this);
 

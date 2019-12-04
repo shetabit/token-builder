@@ -1,6 +1,6 @@
 <?php
 
-namespace Shetabit\Tokenable\Tests;
+namespace Shetabit\TokenBuilder\Tests;
 
 use Orchestra\Testbench\TestCase as BaseTestCase;
 

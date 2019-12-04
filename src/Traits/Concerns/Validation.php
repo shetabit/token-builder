@@ -1,8 +1,8 @@
 <?php
 
-namespace Shetabit\Tokenable\Traits\Concerns;
+namespace Shetabit\TokenBuilder\Traits\Concerns;
 
-use Shetabit\Tokenable\Models\Token;
+use Shetabit\TokenBuilder\Models\Token;
 
 trait Validation
 {

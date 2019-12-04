@@ -1,6 +1,6 @@
 <?php
 
-namespace Shetabit\Tokenable\Contracts;
+namespace Shetabit\TokenBuilder\Contracts;
 
 interface RepositoryInterface
 {

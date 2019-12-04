@@ -1,6 +1,6 @@
 <?php
 
-namespace Shetabit\Tokenable\Models;
+namespace Shetabit\TokenBuilder\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
