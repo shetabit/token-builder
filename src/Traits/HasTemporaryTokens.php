@@ -20,7 +20,7 @@ trait HasTemporaryTokens
      *
      * @return Builder
      */
-    public function temporaryTokenFactory() : Builder
+    public function temporaryTokenBuilder() : Builder
     {
         $tokenBuilder = new Builder;
 
