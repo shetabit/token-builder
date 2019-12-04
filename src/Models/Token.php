@@ -60,11 +60,13 @@ class Token extends Model
     /**
      * Mark token as used
      *
-     * @return bool
+     * @return mixed
      */
     public function use()
     {
-        return $this->increment('usage_count');
+        $this->increment('usage_count');
+
+        return $this;
     }
 
     /**
