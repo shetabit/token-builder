@@ -1,11 +1,11 @@
 {
-    "name": "shetabit/tokenable",
+    "name": "shetabit/token-builder",
     "type": "library",
     "description": "Laravel Token Builder",
     "keywords": [
         "laravel",
         "token",
-        "tokenable",
+        "token builder",
         "onetime token",
         "expiring tokens",
         "one usage token",
@@ -40,12 +40,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Shetabit\\Tokenable\\": "src"
+            "Shetabit\\TokenBuilder\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Shetabit\\Tokenable\\Tests\\": "tests"
+            "Shetabit\\TokenBuilder\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -59,7 +59,7 @@
         },
         "laravel": {
             "providers": [
-                "Shetabit\\Tokenable\\Provider\\TokenBuilderServiceProvider"
+                "Shetabit\\TokenBuilder\\Provider\\TokenBuilderServiceProvider"
             ],
             "aliases": {
                 "TokenBuilder": "Shetabit\\TokenBuilder\\Facade\\TokenBuilder"
