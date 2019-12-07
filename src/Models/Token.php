@@ -146,8 +146,8 @@ class Token extends Model
         return $query
             ->where(function($query) { // check usage limit
                 return $query
-                    ->where('max_usage_limit', '=' ,'0')
-                    ->orWhere('usage_count', '<', 'max_usage_limit');
+                    ->where('max_usage_limit', '=', '0')
+                    ->orWhereRaw('usage_count < max_usage_limit');
             })
             ->where(function($query) { // check expiration time
                 return $query
