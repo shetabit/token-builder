@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * Class TokenBuilder
  *
- * @package Shetabit\TokenBuilder\Facade
- * @see \Shetabit\TokenBuilder\Token
+ * @see \Shetabit\TokenBuilder\Builder
  */
 class TokenBuilder extends Facade
 {
