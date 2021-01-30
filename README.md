@@ -84,7 +84,7 @@ In your `config/app.php` file add these two lines.
 # In your aliases array.
 'aliases' => [
     ...
-    'Payment' => Shetabit\TokenBuilder\Facade\TokenBuilder::class,
+    'TokenBuilder' => Shetabit\TokenBuilder\Facade\TokenBuilder::class,
 ],
 ```
 
