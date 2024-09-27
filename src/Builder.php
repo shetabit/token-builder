@@ -74,7 +74,7 @@ class Builder
      *
      * @return array
      */
-    public function getData() : array
+    public function getData(): array
     {
         return $this->data ?? [];
     }
@@ -122,7 +122,7 @@ class Builder
      *
      * @return int
      */
-    public function getUsageLimit() : int
+    public function getUsageLimit(): int
     {
         return (int) $this->usageLimit;
     }
@@ -178,7 +178,7 @@ class Builder
      *
      * @return Token
      */
-    public function build() : Token
+    public function build(): Token
     {
         $tokenData = [
             'token' => $this->getUniqueId() ?? $this->generateRandomInt(),
@@ -204,7 +204,7 @@ class Builder
      *
      * @return Token
      */
-    public function create() : Token
+    public function create(): Token
     {
         return $this->build();
     }
@@ -214,7 +214,7 @@ class Builder
      *
      * @return Token|null
      */
-    public function findToken() : ?Token
+    public function findToken(): ?Token
     {
         $token = $this->getUniqueId();
         $type = $this->getType();
@@ -230,7 +230,22 @@ class Builder
      */
     private function generateRandomInt($length = 8)
     {
-        return random_int(10**($length-1)+1, (10**$length)-1);
+        return random_int(10 ** ($length - 1) + 1, (10 ** $length) - 1);
+    }
+
+    /**
+     * Determine if the tokenable id has any valid token
+     * 
+     * @param $tokenableId
+     * 
+     * @return bool
+     */
+    public function hasValidToken($tokenableId): bool
+    {
+        return Token::where('tokenable_id', $tokenableId)
+                ->get()
+                ->contains(function ($token) {
+                    return $token->isValid();
+                }
     }
 }
-
