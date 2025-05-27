@@ -74,7 +74,7 @@ class Builder
      *
      * @return array
      */
-    public function getData() : array
+    public function getData(): array
     {
         return $this->data ?? [];
     }
@@ -122,7 +122,7 @@ class Builder
      *
      * @return int
      */
-    public function getUsageLimit() : int
+    public function getUsageLimit(): int
     {
         return (int) $this->usageLimit;
     }
@@ -178,10 +178,10 @@ class Builder
      *
      * @return Token
      */
-    public function build() : Token
+    public function build($length = 8): Token
     {
         $tokenData = [
-            'token' => $this->getUniqueId() ?? $this->generateRandomInt(),
+            'token' => $this->getUniqueId() ?? $this->generateRandomInt($length),
             'expired_at' => $this->getExpireDate(),
             'max_usage_limit' => $this->getUsageLimit(),
             'type' => $this->getType(),
@@ -204,7 +204,7 @@ class Builder
      *
      * @return Token
      */
-    public function create() : Token
+    public function create(): Token
     {
         return $this->build();
     }
@@ -214,7 +214,7 @@ class Builder
      *
      * @return Token|null
      */
-    public function findToken() : ?Token
+    public function findToken(): ?Token
     {
         $token = $this->getUniqueId();
         $type = $this->getType();
@@ -228,9 +228,8 @@ class Builder
      * 
      * @return int
      */
-    private function generateRandomInt($length = 8)
+    private function generateRandomInt($length)
     {
-        return random_int(10**($length-1)+1, (10**$length)-1);
+        return random_int(10 ** ($length - 1) + 1, (10 ** $length) - 1);
     }
 }
-
