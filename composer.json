@@ -31,7 +31,7 @@
     ],
     "require": {
         "php": ">=7.2",
-        "illuminate/support": "^5.8|6.*|7.*|8.*|9.*|10.*"
+        "illuminate/support": "^5.8|6.*|7.*|8.*|9.*|10.*|11.*|12.*"
     },
     "require-dev": {
         "orchestra/testbench": "^4.4",
