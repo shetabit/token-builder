@@ -2,10 +2,27 @@
 
 namespace Shetabit\TokenBuilder\Models;
 
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * A token that can expire, by a date or by the number of times it was used.
+ *
+ * @property string $token
+ * @property CarbonInterface|null $expired_at
+ * @property int $usage_count
+ * @property int $max_usage_limit
+ * @property array<array-key, mixed>|null $data
+ * @property string|null $type
+ * @property CarbonInterface|null $deleted_at
+ */
 class Token extends Model
 {
+    use SoftDeletes;
+
     /**
      * The table associated with the model.
      *
@@ -16,7 +33,7 @@ class Token extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'token',
@@ -28,41 +45,19 @@ class Token extends Model
     ];
 
     /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
-    protected $dates = [
-        'expired_at',
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'usage_count' => 'integer',
-        'max_usage_limit' => 'integer',
-        'data' => 'json',
-    ];
-
-    /**
      * Retrieve related model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     * @return MorphTo<Model, $this>
      */
-    public function tokenable()
+    public function tokenable() : MorphTo
     {
         return $this->morphTo();
     }
 
     /**
      * Mark token as used
-     *
-     * @return mixed
      */
-    public function use()
+    public function use() : static
     {
         $this->increment('usage_count');
 
@@ -71,30 +66,24 @@ class Token extends Model
 
     /**
      * Determine if token has used
-     *
-     * @return bool
      */
-    public function hasUsed()
+    public function hasUsed() : bool
     {
-        return $this->usage_count > 0 ;
+        return $this->usage_count > 0;
     }
 
     /**
      * Determine if token has expired
-     *
-     * @return bool
      */
-    public function hasExpired()
+    public function hasExpired() : bool
     {
-        return $this->expired_at === null ? false : now()->gt($this->expired_at);
+        return $this->expired_at !== null && now()->gt($this->expired_at);
     }
 
     /**
      * Mark token as expired
-     *
-     * @return mixed
      */
-    public function markAsExpired()
+    public function markAsExpired() : static
     {
         $this->forceFill(['expired_at' => now()])->save();
 
@@ -103,56 +92,64 @@ class Token extends Model
 
     /**
      * Determine usage limit is enabled.
-     *
-     * @return bool
      */
-    public function hasMaxUsageLimit()
+    public function hasMaxUsageLimit() : bool
     {
         return $this->max_usage_limit > 0;
     }
 
     /**
      * Determine usage limit has exceed.
-     *
-     * @return bool
      */
-    public function hasExceedMaxUsage()
+    public function hasExceedMaxUsage() : bool
     {
-        $maxUsageLimit = $this->max_usage_limit;
-        $usageCount = $this->usage_count;
-
-        return $this->hasMaxUsageLimit() && ($usageCount >= $maxUsageLimit);
+        return $this->hasMaxUsageLimit() && $this->usage_count >= $this->max_usage_limit;
     }
 
     /**
      * Determine token is valid.
-     *
-     * @return bool
      */
-    public function isValid()
+    public function isValid() : bool
     {
-        return !($this->hasExpired() || $this->hasExceedMaxUsage());
+        return !$this->hasExpired() && !$this->hasExceedMaxUsage();
     }
 
     /**
      * Filter valid tokens
      *
-     * @param $query
-     *
-     * @return mixed
+     * @param Builder<static> $query
+     * @return Builder<static>
      */
-    public function scopeValid($query)
+    public function scopeValid(Builder $query) : Builder
     {
         return $query
-            ->where(function($query) { // check usage limit
-                return $query
-                    ->where('max_usage_limit', '=', '0')
-                    ->orWhereRaw('usage_count < max_usage_limit');
+            ->where(function (Builder $query): void {
+ // check usage limit
+                $query
+                    ->where('max_usage_limit', '=', 0)
+                    ->orWhereColumn('usage_count', '<', 'max_usage_limit');
             })
-            ->where(function($query) { // check expiration time
-                return $query
+            ->where(function (Builder $query): void {
+ // check expiration time
+                $query
                     ->whereNull('expired_at')
                     ->orWhere('expired_at', '>', now());
             });
+    }
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @return array<string, string>
+     */
+    protected function casts() : array
+    {
+        return [
+            'token' => 'string',
+            'expired_at' => 'datetime',
+            'usage_count' => 'integer',
+            'max_usage_limit' => 'integer',
+            'data' => 'json',
+        ];
     }
 }

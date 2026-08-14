@@ -2,29 +2,55 @@
 
 namespace Shetabit\TokenBuilder;
 
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
+use RuntimeException;
 use Shetabit\TokenBuilder\Models\Token;
 use Shetabit\TokenBuilder\Repositories\TokensRepository;
 use Shetabit\TokenBuilder\Traits\Concerns\Validation;
+use Shetabit\TokenBuilder\Traits\HasTemporaryTokens;
 
 class Builder
 {
     use Validation;
 
-    protected $uniqueId;
-    protected $expiredAt;
-    protected $usageLimit;
-    protected $type;
-    protected $relatedItem;
-    protected $data;
+    /**
+     * The token itself, when it is not generated but given.
+     */
+    protected mixed $uniqueId = null;
+
+    /**
+     * The moment the token expires.
+     */
+    protected CarbonInterface|null $expiredAt = null;
+
+    /**
+     * How often the token may be used.
+     */
+    protected int $usageLimit = 0;
+
+    /**
+     * The scope of the token.
+     */
+    protected string|null $type = null;
+
+    /**
+     * The model the token belongs to.
+     */
+    protected Model|null $relatedItem = null;
+
+    /**
+     * Data that is kept with the token.
+     *
+     * @var array<array-key, mixed>
+     */
+    protected array $data = [];
 
     /**
      * Tokens repository
-     * 
-     * @var TokensRepository
      */
-    protected $tokensRepository;
+    protected TokensRepository $tokensRepository;
 
     public function __construct()
     {
@@ -33,12 +59,8 @@ class Builder
 
     /**
      * Set token
-     *
-     * @param $uniqueId
-     *
-     * @return $this
      */
-    public function setUniqueId($uniqueId)
+    public function setUniqueId(mixed $uniqueId) : static
     {
         $this->uniqueId = $uniqueId;
 
@@ -47,10 +69,8 @@ class Builder
 
     /**
      * Retrieve uniqueId
-     *
-     * @return mixed
      */
-    public function getUniqueId()
+    public function getUniqueId() : mixed
     {
         return $this->uniqueId;
     }
@@ -58,13 +78,11 @@ class Builder
     /**
      * Set data
      *
-     * @param $token
-     *
-     * @return $this
+     * It takes the data as an array, or as one argument per value.
      */
-    public function setData($data)
+    public function setData(mixed $data, mixed ...$rest) : static
     {
-        $this->data = is_array($data) ? $data : func_get_args();
+        $this->data = $rest === [] && is_array($data) ? $data : [$data, ...$rest];
 
         return $this;
     }
@@ -72,21 +90,17 @@ class Builder
     /**
      * Retrieve data
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
-    public function getData(): array
+    public function getData() : array
     {
-        return $this->data ?? [];
+        return $this->data;
     }
 
     /**
      * Set expiration date
-     *
-     * @param Carbon $date
-     *
-     * @return $this
      */
-    public function setExpireDate(Carbon $date)
+    public function setExpireDate(CarbonInterface $date) : static
     {
         $this->expiredAt = $date;
 
@@ -94,23 +108,17 @@ class Builder
     }
 
     /**
-     * Set expiration date
-     *
-     * @return mixed
+     * Retrieve expiration date
      */
-    public function getExpireDate()
+    public function getExpireDate() : CarbonInterface|null
     {
         return $this->expiredAt;
     }
 
     /**
      * Set max usage count
-     *
-     * @param int $number
-     *
-     * @return $this
      */
-    public function setUsageLimit(int $number)
+    public function setUsageLimit(int $number) : static
     {
         $this->usageLimit = $number;
 
@@ -119,20 +127,16 @@ class Builder
 
     /**
      * Retrieve max usage count
-     *
-     * @return int
      */
-    public function getUsageLimit(): int
+    public function getUsageLimit() : int
     {
-        return (int) $this->usageLimit;
+        return $this->usageLimit;
     }
 
     /**
      * Set type
-     *
-     * @param string $type
      */
-    public function setType(string $type)
+    public function setType(string $type) : static
     {
         $this->type = $type;
 
@@ -141,22 +145,16 @@ class Builder
 
     /**
      * Retrieve type
-     *
-     * @return mixed
      */
-    public function getType()
+    public function getType() : string|null
     {
         return $this->type;
     }
 
     /**
      * Set related Eloquent Model instance
-     *
-     * @param Model $item
-     *
-     * @return $this
      */
-    public function setRelatedItem(Model $item)
+    public function setRelatedItem(Model $item) : static
     {
         $this->relatedItem = $item;
 
@@ -165,10 +163,8 @@ class Builder
 
     /**
      * Retrieve related Eloquent Model instance
-     *
-     * @return mixed
      */
-    public function getRelatedItem()
+    public function getRelatedItem() : Model|null
     {
         return $this->relatedItem;
     }
@@ -176,60 +172,78 @@ class Builder
     /**
      * Create a new token
      *
-     * @return Token
+     * @param int $length the number of digits of a generated token
      */
-    public function build($length = 8): Token
+    public function build(int $length = 8) : Token
     {
         $tokenData = [
             'token' => $this->getUniqueId() ?? $this->generateRandomInt($length),
             'expired_at' => $this->getExpireDate(),
             'max_usage_limit' => $this->getUsageLimit(),
             'type' => $this->getType(),
-            'data' => $this->getData()
+            'data' => $this->getData(),
         ];
 
-        if ($this->getRelatedItem()) {
-            $token = $this->getRelatedItem()->temporaryTokens()->create($tokenData);
-        } else {
-            $token = $this->tokensRepository->create($tokenData);
+        $relatedItem = $this->getRelatedItem();
+
+        if ($relatedItem === null) {
+            return $this->tokensRepository->create($tokenData);
         }
 
-        return $token;
+        if (!method_exists($relatedItem, 'temporaryTokens')) {
+            throw new RuntimeException(
+                $relatedItem::class.' has to use the '.HasTemporaryTokens::class.' trait to carry tokens.'
+            );
+        }
+
+        $token = $relatedItem->temporaryTokens()->create($tokenData);
+
+        return $token instanceof Token
+            ? $token
+            : throw new RuntimeException($relatedItem::class.'::temporaryTokens() does not answer with tokens.');
     }
 
     /**
      * Alias build
      *
      * @alias build
-     *
-     * @return Token
      */
-    public function create(): Token
+    public function create(int $length = 8) : Token
     {
-        return $this->build();
+        return $this->build($length);
     }
 
     /**
      * Retrieve a token.
-     *
-     * @return Token|null
      */
-    public function findToken(): ?Token
+    public function findToken() : Token|null
     {
         $token = $this->getUniqueId();
-        $type = $this->getType();
-        $tokenable = $this->getRelatedItem();
 
-        return  empty($token) ? null : $this->tokensRepository->findToken($token, $type, $tokenable);
+        if ($token === null || $token === '') {
+            return null;
+        }
+
+        return $this->repository()->findToken($token, $this->getType(), $this->getRelatedItem());
     }
 
     /**
-     * Generate a random token
-     * 
-     * @return int
+     * The repository the tokens are read from and written to.
      */
-    private function generateRandomInt($length)
+    protected function repository() : TokensRepository
     {
-        return random_int(10 ** ($length - 1) + 1, (10 ** $length) - 1);
+        return $this->tokensRepository;
+    }
+
+    /**
+     * Generate a random token of the given number of digits
+     */
+    private function generateRandomInt(int $length) : int
+    {
+        if ($length < 1 || $length > 18) {
+            throw new InvalidArgumentException('A token can be 1 to 18 digits long, '.$length.' given.');
+        }
+
+        return random_int($length === 1 ? 0 : 10 ** ($length - 1), (10 ** $length) - 1);
     }
 }

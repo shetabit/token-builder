@@ -2,19 +2,26 @@
 
 namespace Shetabit\TokenBuilder\Abstracts;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Shetabit\TokenBuilder\Contracts\RepositoryInterface;
 
+/**
+ * @template TModel of Model
+ */
 abstract class RepositoryAbstract implements RepositoryInterface
 {
-    protected $model;
-
-    abstract function model();
+    /**
+     * The model this repository works with.
+     *
+     * @var TModel
+     */
+    protected Model $model;
 
     /**
      * RepositoryAbstract constructor.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
@@ -22,11 +29,18 @@ abstract class RepositoryAbstract implements RepositoryInterface
     }
 
     /**
+     * Retrieve repository's related model
+     *
+     * @return class-string<TModel>
+     */
+    abstract public function model() : string;
+
+    /**
      * Retrieve fillable fields
      *
-     * @return mixed
+     * @return array<int, string>
      */
-    public function getFillable()
+    public function getFillable() : array
     {
         return $this->model->getFillable();
     }
@@ -34,36 +48,40 @@ abstract class RepositoryAbstract implements RepositoryInterface
     /**
      * Create new item and store it
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      *
-     * @return mixed
+     * @return TModel
      */
-    public function create(array $data)
+    public function create(array $data) : Model
     {
-        return $this->model->create($data);
+        /** @var TModel $created */
+        $created = $this->model->newQuery()->create($data);
+
+        return $created;
     }
 
     /**
      * Find item using its id.
      *
-     * @param $id
-     *
-     * @return mixed
+     * @return TModel|null
      */
-    public function find($id)
+    public function find(mixed $id) : Model|null
     {
-        return $this->model->find($id);
+        /** @var TModel|null $found */
+        $found = $this->model->newQuery()->find($id);
+
+        return $found;
     }
 
     /**
      * Update item using given data.
      *
-     * @param $model
-     * @param array $data
+     * @param TModel               $model
+     * @param array<string, mixed> $data
      *
-     * @return mixed
+     * @return TModel
      */
-    public function update($model, array $data)
+    public function update(Model $model, array $data) : Model
     {
         foreach ($data as $key => $value) {
             $model->{$key} = $value;
@@ -77,49 +95,39 @@ abstract class RepositoryAbstract implements RepositoryInterface
     /**
      * Delete item.
      *
-     * @param $model
-     *
-     * @return mixed
+     * @param TModel $model
      */
-    public function delete($model)
+    public function delete(Model $model) : bool
     {
-        return $model->delete();
+        return (bool) $model->delete();
     }
 
     /**
      * Instantiate model
      *
-     * @return Model|\Illuminate\Foundation\Application|\Illuminate\Foundation\Auth\User|mixed
+     * @return TModel
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function makeModel()
+    public function makeModel() : Model
     {
         $model = app($this->model());
 
-        if ($model instanceof Model || $model instanceof \Illuminate\Foundation\Auth\User) {
-            return $this->model = $model;
-        } else {
-            throw new \Exception("Class {$this->model()} must be an instance of Model");
+        if (!$model instanceof Model) {
+            throw new Exception("Class {$this->model()} must be an instance of Model");
         }
+
+        /** @var TModel $model */
+        return $this->model = $model;
     }
 
     /**
      * Call model methods.
      *
-     * @param $method
-     * @param $arguments
-     *
-     * @return mixed
+     * @param array<int, mixed> $arguments
      */
-    public function __call($method, $arguments)
+    public function __call(string $method, array $arguments) : mixed
     {
-        return call_user_func_array(
-            [
-                $this->model,
-                $method,
-            ],
-            $arguments
-        );
+        return $this->model->{$method}(...$arguments);
     }
 }

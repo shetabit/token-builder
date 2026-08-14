@@ -4,39 +4,38 @@ namespace Shetabit\TokenBuilder\Provider;
 
 use Illuminate\Support\ServiceProvider;
 use Shetabit\TokenBuilder\Builder;
+use Shetabit\TokenBuilder\Facade\TokenBuilder;
 
 class TokenBuilderServiceProvider extends ServiceProvider
 {
     /**
      * Perform post-registration booting of services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot() : void
     {
         /**
          * Migrations that needs to be done by user.
          */
-        $this->publishes(
+        $this->publishesMigrations(
             [
-                __DIR__.'/../../database/migrations/' => database_path('migrations')
+                dirname(__DIR__, 2).'/database/migrations' => database_path('migrations'),
             ],
-            'migrations'
+            ['migrations', 'token-builder-migrations']
         );
     }
 
     /**
      * Register any package services.
-     *
-     * @return void
      */
-    public function register()
+    public function register() : void
     {
         /**
          * Bind to service container.
+         *
+         * A builder is never shared: it carries the token that is being built.
          */
-        $this->app->bind('shetabit-token-builder', function () {
-            return new Builder();
-        });
+        $this->app->bind(TokenBuilder::SERVICE_NAME, static fn (): Builder => new Builder());
+
+        $this->app->bind(Builder::class, static fn (): Builder => new Builder());
     }
 }

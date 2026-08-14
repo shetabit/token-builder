@@ -2,30 +2,33 @@
 
 namespace Shetabit\TokenBuilder\Traits;
 
-use Shetabit\TokenBuilder\Models\Token;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Shetabit\TokenBuilder\Builder;
+use Shetabit\TokenBuilder\Models\Token;
 
+/**
+ * Gives a model tokens of its own.
+ *
+ * @phpstan-require-extends Model
+ */
 trait HasTemporaryTokens
 {
     /**
      * Get all of the tokens.
+     *
+     * @return MorphMany<Token, $this>
      */
-    public function temporaryTokens()
+    public function temporaryTokens() : MorphMany
     {
         return $this->morphMany(Token::class, 'tokenable');
     }
 
     /**
      * Token builder factory method.
-     *
-     * @return Builder
      */
     public function temporaryTokenBuilder() : Builder
     {
-        $tokenBuilder = new Builder;
-
-        $tokenBuilder->setRelatedItem($this);
-
-        return $tokenBuilder;
+        return new Builder()->setRelatedItem($this);
     }
 }

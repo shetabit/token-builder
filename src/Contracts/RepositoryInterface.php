@@ -7,7 +7,7 @@ interface RepositoryInterface
     /**
      * Retrieve repository's related model
      *
-     * @return mixed
+     * @return class-string<\Illuminate\Database\Eloquent\Model>
      */
-    public function model();
+    public function model() : string;
 }

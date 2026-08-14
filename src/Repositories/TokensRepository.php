@@ -2,67 +2,61 @@
 
 namespace Shetabit\TokenBuilder\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Shetabit\TokenBuilder\Models\Token;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use InvalidArgumentException;
 use Shetabit\TokenBuilder\Abstracts\RepositoryAbstract;
+use Shetabit\TokenBuilder\Models\Token;
+use Shetabit\TokenBuilder\Traits\HasTemporaryTokens;
 
+/**
+ * @extends RepositoryAbstract<Token>
+ */
 class TokensRepository extends RepositoryAbstract
 {
-    public function model()
+    /**
+     * @return class-string<Token>
+     */
+    public function model() : string
     {
         return Token::class;
     }
 
     /**
      * Retrieve a token.
-     *
-     * @param $token
-     * @param $type
-     * @param $tokenable
-     *
-     * @return Token|null
      */
-    public function findToken($token, ?string $type = null, ?Model $tokenable = null) : ?Token
+    public function findToken(mixed $token, string|null $type = null, Model|null $tokenable = null) : Token|null
     {
-        if (!empty($tokenable)) {
-            $query = $tokenable->temporaryTokens();
-        } else {
-            $query = $this->model;
-        }
-
-        return $query
-            ->where('token', '=', $token)
-            ->when(!empty($type), function ($query) use ($type) {
-                return $query->where('type', '=', $type);
-            })
-            ->with('tokenable')
-            ->first();
+        return $this->query($tokenable, $token, $type)->first();
     }
 
     /**
      * Retrieve a token if it is valid.
-     *
-     * @param $token
-     * @param $type
-     * @param $tokenable
-     *
-     * @return Token|null
      */
-    public function findValidToken($token, ?string $type = null, ?Model $tokenable = null) : ?Token
+    public function findValidToken(mixed $token, string|null $type = null, Model|null $tokenable = null) : Token|null
     {
-        if (!empty($tokenable)) {
-            $query = $tokenable->temporaryTokens();
-        } else {
-            $query = $this->model;
+        return $this->query($tokenable, $token, $type)->valid()->first();
+    }
+
+    /**
+     * The query that looks a token up, of the given model or of all of them.
+     *
+     * @return Builder<Token>|MorphMany<Token, Model>
+     */
+    private function query(Model|null $tokenable, mixed $token, string|null $type) : Builder|MorphMany
+    {
+        if ($tokenable !== null && !method_exists($tokenable, 'temporaryTokens')) {
+            throw new InvalidArgumentException(
+                $tokenable::class.' has to use the '.HasTemporaryTokens::class.' trait to carry tokens.'
+            );
         }
 
+        $query = $tokenable === null ? $this->model->newQuery() : $tokenable->temporaryTokens();
+
         return $query
-            ->valid()
             ->where('token', '=', $token)
-            ->when(!empty($type), function ($query) use ($type) {
-                return $query->where('type', '=', $type);
-            })
-            ->with('tokenable')
-            ->first();
+            ->when($type !== null && $type !== '', fn (Builder $query) => $query->where('type', '=', $type))
+            ->with('tokenable');
     }
 }

@@ -2,38 +2,56 @@
 
 namespace Shetabit\TokenBuilder\Traits\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use Shetabit\TokenBuilder\Models\Token;
+use Shetabit\TokenBuilder\Repositories\TokensRepository;
 
 trait Validation
 {
     /**
-     * Retrieve a token if it is valid.
-     *
-     * @return Token|null
+     * The token itself, when it is not generated but given.
      */
-    public function findValidToken() : ?Token
+    abstract public function getUniqueId() : mixed;
+
+    /**
+     * The scope of the token.
+     */
+    abstract public function getType() : string|null;
+
+    /**
+     * The model the token belongs to.
+     */
+    abstract public function getRelatedItem() : Model|null;
+
+    /**
+     * The repository the tokens are read from and written to.
+     */
+    abstract protected function repository() : TokensRepository;
+
+    /**
+     * Retrieve a token if it is valid.
+     */
+    public function findValidToken() : Token|null
     {
         $token = $this->getUniqueId();
-        $type = $this->getType();
-        $tokenable = $this->getRelatedItem();
 
-        return  empty($token) ? null : $this->tokensRepository->findValidToken($token, $type, $tokenable);
+        if ($token === null || $token === '') {
+            return null;
+        }
+
+        return $this->repository()->findValidToken($token, $this->getType(), $this->getRelatedItem());
     }
 
     /**
      * Determine if token is valid
-     * 
-     * @return bool
      */
     public function isValid() : bool
     {
-        return (bool) $this->findValidToken();
+        return $this->findValidToken() instanceof Token;
     }
 
     /**
      * Determine if token is invalid
-     * 
-     * @return bool
      */
     public function isInvalid() : bool
     {
@@ -42,10 +60,8 @@ trait Validation
 
     /**
      * Alias for invalid
-     * 
+     *
      * @alias isInvalid
-     * 
-     * @return bool
      */
     public function isNotValid() : bool
     {
