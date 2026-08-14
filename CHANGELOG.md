@@ -7,9 +7,16 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## Unreleased
 
 ### Added
-- A test suite of 55 tests: unit tests for the builder, the token, the repository, the validation concern, the facade
-  and the service provider, and feature tests that run the flows of the readme end to end against a database. It
-  covers 98% of `src/`.
+- The valid tokens of a model can be looked up without knowing a token: `$user->hasValidTemporaryToken('reset-password')`
+  and `$user->validTemporaryTokens('reset-password')` answer whether the model still has a token that has neither
+  expired nor been used up, which a "forgot password" flow needs before it sends a new pin. The same questions are
+  answered by `TokenBuilder::setRelatedItem($user)->hasAnyValidToken()` and `findValidTokens()` — without a related
+  item they look at the tokens of every model — and by `TokensRepository::hasAnyValidToken()` and
+  `findValidTokens()`. Both ignore the unique id: `findValidToken()` and `isValid()` stay the way to validate a token
+  you have. ([#6](https://github.com/shetabit/token-builder/issues/6))
+- A test suite of 69 tests: unit tests for the builder, the token, the repository, the validation concern, the token
+  trait, the facade and the service provider, and feature tests that run the flows of the readme end to end against a
+  database. It covers 100% of `src/`.
 - GitHub Actions workflows running the test suite (PHP 8.4 and 8.5, Laravel 12 and 13, lowest and highest
   dependencies), the coding style check, the static analysis and the code coverage on every pull request and on every
   push to `master`. The coverage has to stay above 95%.

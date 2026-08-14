@@ -94,6 +94,61 @@ final class TokensRepositoryTest extends TestCase
         $this->assertNotNull($repository->findToken($token->token));
     }
 
+    public function testItFindsEveryValidTokenOfAModel() : void
+    {
+        $user = $this->createUser();
+        $other = $this->createUser('Someone else');
+
+        $login = new Builder()->setRelatedItem($user)->setType('login')->setUsageLimit(1)->build();
+        $signup = new Builder()->setRelatedItem($user)->setType('signup')->build();
+        new Builder()->setRelatedItem($other)->setType('login')->build();
+
+        $repository = new TokensRepository();
+
+        $this->assertSame(3, $repository->findValidTokens()->count());
+        $this->assertSame(2, $repository->findValidTokens(null, $user)->count());
+        $this->assertSame([$login->getKey()], $repository->findValidTokens('login', $user)->modelKeys());
+        $this->assertSame([$signup->getKey()], $repository->findValidTokens('signup', $user)->modelKeys());
+
+        $login->use();
+
+        $this->assertSame([], $repository->findValidTokens('login', $user)->modelKeys());
+        $this->assertSame([$signup->getKey()], $repository->findValidTokens(null, $user)->modelKeys());
+    }
+
+    public function testItAnswersWhetherThereIsAnyValidTokenLeft() : void
+    {
+        $user = $this->createUser();
+        $token = new Builder()->setRelatedItem($user)->setType('login')->setUsageLimit(1)->build();
+
+        $repository = new TokensRepository();
+
+        $this->assertTrue($repository->hasAnyValidToken());
+        $this->assertTrue($repository->hasAnyValidToken(null, $user));
+        $this->assertTrue($repository->hasAnyValidToken('login', $user));
+        $this->assertFalse($repository->hasAnyValidToken('signup', $user));
+        $this->assertFalse($repository->hasAnyValidToken(null, $this->createUser('Someone else')));
+
+        $token->use();
+
+        $this->assertFalse($repository->hasAnyValidToken('login', $user));
+    }
+
+    public function testAnExpiredTokenIsNoValidTokenOfAModelEither() : void
+    {
+        $user = $this->createUser();
+        new Builder()->setRelatedItem($user)->setExpireDate(now()->addMinutes(5))->build();
+
+        $repository = new TokensRepository();
+
+        $this->assertTrue($repository->hasAnyValidToken(null, $user));
+
+        $this->travelTo(now()->addMinutes(6));
+
+        $this->assertFalse($repository->hasAnyValidToken(null, $user));
+        $this->assertSame(0, $repository->findValidTokens(null, $user)->count());
+    }
+
     public function testItRefusesAModelThatCanNotCarryTokens() : void
     {
         $post = Post::query()->create(['title' => 'A post']);

@@ -2,6 +2,7 @@
 
 namespace Shetabit\TokenBuilder\Traits\Concerns;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Shetabit\TokenBuilder\Models\Token;
 use Shetabit\TokenBuilder\Repositories\TokensRepository;
@@ -40,6 +41,30 @@ trait Validation
         }
 
         return $this->repository()->findValidToken($token, $this->getType(), $this->getRelatedItem());
+    }
+
+    /**
+     * Retrieve every valid token of the related model, latest one first.
+     *
+     * The unique id is not part of this lookup: it answers which tokens the
+     * related model (and the type, when one is set) still has, which is what
+     * "may I hand out a new one?" asks, before any token is known.
+     *
+     * @return Collection<int, Token>
+     */
+    public function findValidTokens() : Collection
+    {
+        return $this->repository()->findValidTokens($this->getType(), $this->getRelatedItem());
+    }
+
+    /**
+     * Determine if the related model has any valid token.
+     *
+     * As with findValidTokens(), the unique id is not part of this lookup.
+     */
+    public function hasAnyValidToken() : bool
+    {
+        return $this->repository()->hasAnyValidToken($this->getType(), $this->getRelatedItem());
     }
 
     /**

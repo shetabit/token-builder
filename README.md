@@ -37,6 +37,7 @@ we have 2 things that can **expire** genereted tokens:
   - [Add relations](#useful-methods)
   - [Attach custom data](#useful-methods)
   - [Retrieve tokens](#retrieve-tokens)
+  - [The valid tokens of a model](#the-valid-tokens-of-a-model)
   - [TokenBuilder reference](#tokenbuilder-reference)
   	- [setUniqueId](#setUniqueId)
   	- [getUniqueId](#getUniqueId)
@@ -53,6 +54,13 @@ we have 2 things that can **expire** genereted tokens:
   	- [build](#build)
   	- [findToken](#findToken)
   	- [findValidToken](#findValidToken)
+  	- [findValidTokens](#findValidTokens)
+  	- [hasAnyValidToken](#hasAnyValidToken)
+  - [Model (HasTemporaryTokens) reference](#model-reference)
+  	- [temporaryTokens](#temporaryTokens)
+  	- [temporaryTokenBuilder](#temporaryTokenBuilder)
+  	- [validTemporaryTokens](#validTemporaryTokens)
+  	- [hasValidTemporaryToken](#hasValidTemporaryToken)
   - [Token (Eloquent) reference](#token-reference)
   	- [use](#use)
   	- [hasUsed](#hasUsed)
@@ -287,6 +295,62 @@ $tokenObject = $user->temporaryTokenBuilder()->setUniqueId($token)->findToken();
 $tokenObject = $user->temporaryTokenBuilder()->setUniqueId($token)->findValidToken();
 ```
 
+#### The valid tokens of a model
+
+sometimes you don't have a token yet and want to know whether a model still has one that is valid:
+a `forgot password` pin should not be sent again while the one that was sent is still usable.
+
+a model that uses the `HasTemporaryTokens` trait can answer that itself:
+
+```php
+use App\User;
+
+$user = User::first();
+
+// does this user still have a valid token?
+if ($user->hasValidTemporaryToken()) {
+    echo 'this user has a valid token';
+}
+
+// the same question, for one type of token only
+if ($user->hasValidTemporaryToken('reset-password')) {
+    echo 'a reset pin was sent and is still valid';
+}
+
+// retrieve them, latest one first
+$tokenObjects = $user->validTemporaryTokens('reset-password');
+
+echo $tokenObjects->count();
+echo $tokenObjects->first()?->token;
+```
+
+so a pin is only built when there is none left:
+
+```php
+if (!$user->hasValidTemporaryToken('reset-password')) {
+    $user->temporaryTokenBuilder()
+        ->setType('reset-password')
+        ->setUsageLimit(1)
+        ->setExpireDate(Carbon::now()->addMinutes(5))
+        ->build(6);
+}
+```
+
+the `TokenBuilder` answers the same questions, and without a relation it looks at the tokens of every model:
+
+```php
+use Shetabit\TokenBuilder\Facade\TokenBuilder;
+
+// the valid tokens of one user, of one type
+$tokenObjects = TokenBuilder::setRelatedItem($user)->setType('reset-password')->findValidTokens();
+
+// is there any valid reset pin at all?
+$exists = TokenBuilder::setType('reset-password')->hasAnyValidToken();
+```
+
+**notice:** `findValidTokens` and `hasAnyValidToken` ask whether there is *any* valid token, so they ignore
+`setUniqueId`. use `findValidToken` or `isValid` to validate a token you have.
+
 #### TokenBuilder reference
 
 This is a reference for TokenBuilder methods.
@@ -359,6 +423,38 @@ This is a reference for TokenBuilder methods.
   
   find token if it is valid and return `null` if not exists.
 
+- ###### findValidTokens
+
+  retrieve every valid token of the related item (and of the type, when one is set), latest one first, as an eloquent
+  collection. without a related item it looks at the tokens of every model. the unique id plays no part in it.
+
+- ###### hasAnyValidToken
+
+  determine if there is any valid token of the related item (and of the type, when one is set), and returns a boolean
+  result. the unique id plays no part in it either.
+
+#### Model Reference
+
+these methods are added to your own models by the `Shetabit\TokenBuilder\Traits\HasTemporaryTokens` trait.
+
+- ###### temporaryTokens
+
+  the `morphMany` relation with every token of the model, valid or not.
+
+- ###### temporaryTokenBuilder
+
+  a `TokenBuilder` with the model set as the related item.
+
+- ###### validTemporaryTokens
+
+  retrieve the valid tokens of the model, latest one first, as an eloquent collection.
+  a type can be given (`validTemporaryTokens('reset-password')`) to only look at the tokens of that type.
+
+- ###### hasValidTemporaryToken
+
+  determine if the model still has a valid token, and returns a boolean result.
+  a type can be given here as well.
+
 #### Token Reference
 
 - ###### use
@@ -398,8 +494,8 @@ PHP 8.4 and 8.5, against Laravel 12 and 13 and against both the lowest and the h
 coding style is checked with PHP_CodeSniffer, the sources are analysed with PHPStan (level 7, with larastan) and the
 code coverage of the test suite is measured and has to stay above 95%.
 
-The suite has two parts: `tests/Unit` covers the builder, the token, the repository and the provider on their own, and
-`tests/Feature` runs the flows of this readme end to end against a database.
+The suite has two parts: `tests/Unit` covers the builder, the token, the repository, the token trait and the provider
+on their own, and `tests/Feature` runs the flows of this readme end to end against a database.
 
 You can run the same checks locally. With PHP and Composer installed on your machine:
 

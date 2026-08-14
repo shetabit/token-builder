@@ -60,4 +60,55 @@ final class ValidationTest extends TestCase
         $this->assertFalse(new Builder()->setUniqueId('a-token-that-was-never-built')->isValid());
         $this->assertFalse(new Builder()->isValid());
     }
+
+    public function testItTellsWhetherAModelStillHasAValidToken() : void
+    {
+        $user = $this->createUser();
+
+        $builder = new Builder()->setRelatedItem($user)->setType('reset-password');
+
+        $this->assertFalse($builder->hasAnyValidToken());
+        $this->assertCount(0, $builder->findValidTokens());
+
+        $token = $builder->setUsageLimit(1)->build();
+
+        $this->assertTrue($builder->hasAnyValidToken());
+        $this->assertSame([$token->getKey()], $builder->findValidTokens()->modelKeys());
+
+        $token->use();
+
+        $this->assertFalse($builder->hasAnyValidToken());
+        $this->assertCount(0, $builder->findValidTokens());
+    }
+
+    public function testTheValidTokensOfAModelAreItsOwnOnesOfItsOwnType() : void
+    {
+        $user = $this->createUser();
+        $other = $this->createUser('Someone else');
+
+        $token = new Builder()->setRelatedItem($user)->setType('reset-password')->build();
+        new Builder()->setRelatedItem($other)->setType('reset-password')->build();
+
+        $this->assertSame(
+            [$token->getKey()],
+            new Builder()->setRelatedItem($user)->setType('reset-password')->findValidTokens()->modelKeys()
+        );
+        $this->assertFalse(new Builder()->setRelatedItem($user)->setType('login')->hasAnyValidToken());
+
+        // Without a related model, the tokens of everyone are looked at.
+        $this->assertCount(2, new Builder()->setType('reset-password')->findValidTokens());
+        $this->assertTrue(new Builder()->hasAnyValidToken());
+    }
+
+    public function testTheUniqueIdIsNoPartOfTheLookupOfEveryValidToken() : void
+    {
+        $user = $this->createUser();
+        new Builder()->setRelatedItem($user)->build();
+
+        $builder = new Builder()->setRelatedItem($user)->setUniqueId('a-token-that-was-never-built');
+
+        $this->assertNull($builder->findValidToken());
+        $this->assertTrue($builder->hasAnyValidToken());
+        $this->assertCount(1, $builder->findValidTokens());
+    }
 }
