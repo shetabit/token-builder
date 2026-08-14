@@ -26,6 +26,8 @@ use Shetabit\TokenBuilder\Models\Token;
  * @method static Token create(int $length = 8)
  * @method static Token|null findToken()
  * @method static Token|null findValidToken()
+ * @method static \Illuminate\Database\Eloquent\Collection<int, Token> findValidTokens()
+ * @method static bool hasAnyValidToken()
  * @method static bool isValid()
  * @method static bool isInvalid()
  * @method static bool isNotValid()

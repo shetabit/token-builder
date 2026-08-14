@@ -57,6 +57,33 @@ final class BuildingTokensTest extends TestCase
         $this->assertTrue($token->is($found));
     }
 
+    public function testAUserIsOnlySentANewPinWhenTheOneTheyHaveIsNoLongerValid() : void
+    {
+        $user = $this->createUser();
+
+        // "Forgot password": no pin was sent yet, so one is built.
+        $this->assertFalse($user->hasValidTemporaryToken('reset-password'));
+
+        $pin = $user->temporaryTokenBuilder()
+            ->setType('reset-password')
+            ->setUsageLimit(1)
+            ->setExpireDate(now()->addMinutes(5))
+            ->build(6);
+
+        // The user asks again while the pin they were sent is still valid.
+        $this->assertTrue($user->hasValidTemporaryToken('reset-password'));
+        $this->assertSame([$pin->getKey()], $user->validTemporaryTokens('reset-password')->modelKeys());
+
+        // A pin of another type, or of another user, is none of this flow's business.
+        $this->assertFalse($user->hasValidTemporaryToken('sms-verification'));
+        $this->assertFalse($this->createUser('Someone else')->hasValidTemporaryToken('reset-password'));
+
+        // The pin is used to reset the password, and a new one may be sent again.
+        $user->temporaryTokenBuilder()->setType('reset-password')->setUniqueId($pin->token)->findValidToken()?->use();
+
+        $this->assertFalse($user->hasValidTemporaryToken('reset-password'));
+    }
+
     public function testTheDataOfATokenSurvivesTheRoundTrip() : void
     {
         $data = ['mobile' => '9373620353', 'name' => 'John Doe'];
